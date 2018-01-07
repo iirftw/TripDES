@@ -13,8 +13,11 @@
 #include <vector>
 #include <algorithm>
 
+//An implementation of the triple DES encryption system written in c++
+
 //"good" functions checked against http://page.math.tu-berlin.de/~kant/teaching/hess/krypto-ws2006/des.htm
 
+//implementation of the first permuted choise
 std::bitset<56> PermutedChoice1(std::bitset<64> in){
 	std::bitset<56> out;
 	const int PC1Table[56]={
@@ -33,6 +36,7 @@ std::bitset<56> PermutedChoice1(std::bitset<64> in){
 	return out;
 }//good
 
+//implementation of the second permuted choise
 std::bitset<48> PermutedChoice2(std::bitset<56> in){
 	std::bitset<56> out;
 	const u_int8_t PC2Table[56]={
@@ -54,6 +58,7 @@ std::bitset<48> PermutedChoice2(std::bitset<56> in){
 	return out2;
 }//good
 
+//concatinate a pair of bitsets into one
 template <int N1, int N2 >
 std::bitset <N1 + N2> concat( const std::bitset <N1> & b1, const std::bitset <N2> & b2 ) {
 	std::string s1 = b1.to_string();
@@ -61,6 +66,7 @@ std::bitset <N1 + N2> concat( const std::bitset <N1> & b1, const std::bitset <N2
 	return std::bitset <N1 + N2>( s1 + s2 );
 }//good
 
+//generate the sub keys
 std::vector<std::bitset<48>> KeyGen(std::bitset<64> inKey,bool isEncript){
 	std::vector<std::bitset<48>> outSet;
 	std::bitset<56> pc1Key = PermutedChoice1(inKey);
@@ -92,6 +98,7 @@ std::vector<std::bitset<48>> KeyGen(std::bitset<64> inKey,bool isEncript){
 	return outSet;
 }//good
 
+//implementation of the initial permutation
 std::bitset<64> InitialPermutation(std::bitset<64> in){
 	std::bitset<64> out;
 	const int IPTable[64]={
@@ -110,6 +117,7 @@ std::bitset<64> InitialPermutation(std::bitset<64> in){
 	return out;
 }//good
 
+//inverse of the initial permutation
 std::bitset<64> NotInitialPermutation(std::bitset<64> in){
 	std::bitset<64> out;
 	const int IPTable[64]={
@@ -128,6 +136,7 @@ std::bitset<64> NotInitialPermutation(std::bitset<64> in){
 	return out;
 }
 
+//implementation of the expansion box
 std::bitset<48> ExpansionBox(std::bitset<32> in){
 	std::bitset<48> out;
 	const u_int8_t expTable[48]={
@@ -146,6 +155,7 @@ std::bitset<48> ExpansionBox(std::bitset<32> in){
 	return out;
 }//good
 
+//implementation of the selection boxes
 std::bitset<32> SelectionBox(std::bitset<48> in){
 	std::bitset<32> out;
 	bool in2[48]={false};
@@ -212,6 +222,7 @@ std::bitset<32> SelectionBox(std::bitset<48> in){
 	return out;
 }//good
 
+//implementation of the permutation box
 std::bitset<32> PBox(std::bitset<32> in){
 	std::bitset<32> out=0;
 	std::bitset<32> in2=0;
@@ -238,6 +249,7 @@ std::bitset<32> PBox(std::bitset<32> in){
 	return out2;
 }//good
 
+//Take the functions and make it into DES
 std::bitset<64> DES(u_int64_t inBlock, std::vector<std::bitset<48> > &keys) {
 	std::bitset<64> bitBlock=inBlock;
 	std::bitset<64> permBlock=InitialPermutation(bitBlock);
@@ -264,38 +276,7 @@ std::bitset<64> DES(u_int64_t inBlock, std::vector<std::bitset<48> > &keys) {
 	return full;
 }
 
-/*
-int main() {
-	std::bitset<64> plaintext=0x123456789ABCDEF;
-	std::bitset<64> Key=0x133457799BBCDFF1;
-	std::vector<std::bitset<48>> keys = KeyGen(Key, true);
-	std::bitset<64> permBlock=InitialPermutation(plaintext);
-	std::bitset<32> leftBlock;
-	std::bitset<32> rightBlock;
-	for (int i=0; i<64; i++) {
-		if (i<32){
-			rightBlock[i]=permBlock[i];
-		}
-		else{
-			leftBlock[i-32]=permBlock[i];
-		}
-	}
-	for (int i=0; i<16; i++) {
-		std::bitset<48> expBlock=ExpansionBox(rightBlock);
-		std::bitset<48> xorBlock=expBlock^keys[i];
-		std::bitset<32> sBlock=SelectionBox(xorBlock);
-		std::bitset<32> pBlock=PBox(sBlock);
-		std::bitset<32> temp = rightBlock;
-		rightBlock = pBlock^leftBlock;
-		leftBlock = temp;
-	}
-	std::bitset<64> full = NotInitialPermutation(concat<32,32>(rightBlock, leftBlock));
-	std::bitset<64> ref=0b1000010111101000000100110101010000001111000010101011010000000101;
-
-	return 0;
-}
-*/
-
+//Use DES to make triple DES along with input and output handeling
 int main() {
 	std::string inFile;
 	std::cout << "Input file name to use: ";
